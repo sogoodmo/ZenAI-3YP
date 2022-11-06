@@ -29,7 +29,7 @@ def main() -> None:
                     mp_drawing.draw_detection(image, detection)
 
             cv2.imshow('Test Video', cv2.flip(image, 1))
-            if cv2.waitKey(5) & 0xFF == ord('q'):
+            if cv2.waitKey(5) & 0xFF == ord('x'):
                 break
     cap.release() 
             
