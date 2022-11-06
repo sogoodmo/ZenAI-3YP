@@ -1,15 +1,16 @@
 import mediapipe as mp
-import cv2
+import cv2 as cv 
+import numpy as np 
 
 
-def main() -> None:
+def face_detection() -> None:
     print("Starting test..")
     
     
     mp_face_detection = mp.solutions.face_detection
     mp_drawing = mp.solutions.drawing_utils
     
-    cap = cv2.VideoCapture(0)
+    cap = cv.VideoCapture(0)
     
     with mp_face_detection.FaceDetection( model_selection=0, min_detection_confidence=0.5 ) as face_detection:
         while cap.isOpened():
@@ -19,19 +20,52 @@ def main() -> None:
                 continue 
             
             image.flags.writeable = False
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = face_detection.process(image)
             
             image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
             if results.detections:
                 for detection in results.detections:
                     mp_drawing.draw_detection(image, detection)
 
-            cv2.imshow('Test Video', cv2.flip(image, 1))
-            if cv2.waitKey(5) & 0xFF == ord('x'):
+            cv.imshow('Test Video', cv.flip(image, 1))
+            if cv.waitKey(5) & 0xFF == ord('x'):
                 break
     cap.release() 
-            
+
+def play_video():
+    
+    print("Starting test..")
+    
+    cap = cv.VideoCapture(0)
+    if not cap.isOpened():
+        print("Cannot open camera")
+        return
+    
+    
+    frame_num = 0
+    while True:
+        frame_num += 1
+        ret, frame = cap.read()   
+        if not ret:
+            print("Cannot receieve frame img. Exiting...")
+            break 
+        
+        IMG = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        cv.imshow(f'Frame #1', cv.flip(IMG,1))
+        # cv.imshow(f'Frame #2', frame)
+        
+        if cv.waitKey(1) & 0xFF == ord('q'):
+            break
+        
+    print("Finishing..")
+       
+def main() -> None:
+    face_detection() 
+    
+    play_video()
+          
+      
 if __name__ == '__main__':
     main()
