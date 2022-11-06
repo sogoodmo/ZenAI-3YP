@@ -17,8 +17,8 @@ import random
 #matplotlib.use('AGG')
 #import matplotlib.pyplot as plt
 from keras.callbacks import ModelCheckpoint,CSVLogger
-# import tensorflow as tf
-# import keras.backend as K
+import tensorflow as tf
+import keras.backend as K
 from PIL import Image
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -149,7 +149,7 @@ def generator_val_batch(val_txt,batch_size,num_classes,img_path):
 
 def main():
 
-    path = 'C:\Users\moham\Desktop\Third Year Project\Yoga-82'
+    path = 'C:\\Users\\moham\\Desktop\\Third Year Project\\yoga82code\\Yoga-82'
     img_path = path+'yoga_dataset_links/'
     train_file = path+'yoga_train.txt'
     test_file = path+'yoga_test.txt'
