@@ -1,9 +1,19 @@
 # ZenAI-3YP
 
+# 5 Yoga Pose Classifying
+1. **Warrior**
+2. **Tree**
+3. **Cobra**
+4. **Plank**
+5. **Downward dog**
+
+
 ## First Steps 
 - Play with MediaPipe 
 - Research into CNNs and understand how they're used in classification 
 - Understand 1 model and try to re-train it using own data set...?
+
+
 
 
 ### Notes:
