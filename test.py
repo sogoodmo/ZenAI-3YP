@@ -6,7 +6,6 @@ import numpy as np
 def face_detection() -> None:
     print("Starting test..")
     
-    
     mp_face_detection = mp.solutions.face_detection
     mp_drawing = mp.solutions.drawing_utils
     
@@ -23,6 +22,9 @@ def face_detection() -> None:
             image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             results = face_detection.process(image)
             
+            
+            img_no_ml = image
+            
             image.flags.writeable = True
             image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
             if results.detections:
@@ -30,11 +32,13 @@ def face_detection() -> None:
                     mp_drawing.draw_detection(image, detection)
 
             cv.imshow('Test Video', cv.flip(image, 1))
+            cv.imshow(f'No Recognition', cv.flip(img_no_ml,1))
+
             if cv.waitKey(5) & 0xFF == ord('x'):
                 break
     cap.release() 
 
-def play_video():
+def test_vid_cap():
     
     print("Starting test..")
     
@@ -59,12 +63,15 @@ def play_video():
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
         
+    cap.release()
     print("Finishing..")
        
 def main() -> None:
     face_detection() 
     
-    play_video()
+    
+    
+    # test_vid_cap()
           
       
 if __name__ == '__main__':
