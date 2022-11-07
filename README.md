@@ -1,11 +1,11 @@
 # ZenAI-3YP
 
 # 5 Yoga Pose Classifying
-1. **Warrior**
-2. **Tree**
-3. **Cobra**
-4. **Plank**
-5. **Downward dog**
+1. **Warrior**![Alt text](/assets/warrior.png)
+2. **Tree**![Alt text](/assets/tree.png)
+3. **Cobra**![Alt text](/assets/cobra.png)
+4. **Plank**![Alt text](/assets/plank.png)
+5. **Downward dog**![Alt text](/assets/downward_dog.png)
 
 
 ## First Steps 
@@ -17,11 +17,12 @@
 
 
 ### Notes:
+* Firstly using [MediaPipe](https://google.github.io/mediapipe/)
 * https://colab.research.google.com/drive/19txHpN8exWhstO6WVkfmYYVC6uug_oVR (K-NN Pose classifer) Kinda how it works
     - Convert key points into feature vectors (Eyes, Wrists, etc..)
     - Calculate pairwise distance between predefined set of pose joints
         - _Since algo relies on distance, all poses are normalized to have same torso size and vertical torso orientation_
-    - ![Shown Here](knn-class.png)
+    - ![Shown Here](assets/knn-class.png)
     - To get better classification - KNN is invoked twice with different distance metrics
         - First to filter out samples that are _almost_ the same as the target with only a few differnces in the features vectors (e.g Slightly bent joints)
         - Secondly the average per-coordinate distance is used to the find the nearest pose cluster among those from the first search
