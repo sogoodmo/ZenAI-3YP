@@ -13,7 +13,10 @@
 - Research into CNNs and understand how they're used in classification 
 - Understand 1 model and try to re-train it using own data set...?
 
-
+### Plan
+- Use MediaPipe to extract key body points 
+- Feed these points into another classify specifically trained on yoga models 
+- Then develop feedback algorithm within mediapipe + cv2 
 
 
 ### Notes:
@@ -29,3 +32,9 @@
             - _i.e Create first group that gets pretty much all the same images, then second group to find nearest pose among the near idententical images_
     - To clear the noise and smooth data, apply [Exponential Moving Average (EMA)](https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average) - Also, we can do soft KNN and calculate a probabilty for each cluster 
     - [Source](https://google.github.io/mediapipe/solutions/pose_classification.html)
+
+* https://ai.googleblog.com/2020/08/on-device-real-time-body-pose-tracking.html
+    - Current standard [Coco Topology](https://cocodataset.org/#keypoints-2020) Uses 17 Landmarks across torso, face, legs and arms. Not enough detail for ankle and wrist orientation which would be key for fitness applications 
+    - BlazePose (ML Pose detection engine for mediapose) uses 33 Keypoints - shown above 
+    - Yoga use case 
+        - ![](https://1.bp.blogspot.com/-PFpXlfSsT9k/XzVxqz6f7EI/AAAAAAAAGYw/rRlgge0Tn5oHOae-d1WVFGFPguucsG_QgCLcBGAsYHQ/s320/image1.gif)
