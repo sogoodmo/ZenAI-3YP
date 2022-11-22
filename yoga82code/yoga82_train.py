@@ -154,16 +154,14 @@ def main():
     train_file = path+'yoga_train.txt'
     test_file = path+'yoga_test.txt'
     #test_test ='yoga_test.txt'
-    f1 = open(train_file, 'r')
-    f2 = open(test_file, 'r')
-    lines = f1.readlines()
 
-    f1.close()
+    with open(train_file, 'r') as train_f:
+        lines = train_f.readlines()
     train_samples = len(lines)
-    #print(train_samples)
-
-    lines = f2.readlines()
-    f2.close()
+    
+    with open(test_file, 'r') as test_f:
+        lines = test_f.readlines()
+        
     test_samples = len(lines)
 
     num_classes = [6,20,82]
