@@ -140,3 +140,5 @@ cython_debug/
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Python
 /mp_env
 /.vscode
+
+yoga82code/Yoga-82/tmp/
