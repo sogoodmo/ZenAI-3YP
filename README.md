@@ -1,11 +1,13 @@
 # ZenAI-3YP
 
 # 5 Yoga Pose Classifying
-1. **Warrior**![Alt text](/assets/warrior.png)
-2. **Tree**![Alt text](/assets/tree.png)
-3. **Cobra**![Alt text](/assets/cobra.png)
-4. **Plank**![Alt text](/assets/plank.png)
-5. **Downward dog**![Alt text](/assets/downward_dog.png)
+1. **Warrior**
+2. **Tree**
+3. **Cobra**
+4. ~~**Plank**~~ **Chair**
+5. **Downward dog**
+
+Note: Plank has been replaced for chair since I found a dataset that has alot of images for all my original poses except for Plank (Which was replaced by chair)
 
 
 ## First Steps 
