@@ -18,7 +18,7 @@ RelevantLandmarks = list(mp_pose.PoseLandmark)[11:17] + list(mp_pose.PoseLandmar
 path = 'C:\\Users\\moham\\Desktop\\Third Year Project\\LauranceMoneyDataset\\'
 
 class_map = {
-    "warrior" : "Warrior", #Warrior
+    "warrior" : "WarriorIII", #Warrior
     "tree" : "Tree", #Tree 
     "cobra": "Cobra", #Cobra
     "chair": "Chair", #Plank 
@@ -116,7 +116,7 @@ def generate_csv_train(train=True):
                     total_lines_added += 1
                 
 
-            print(f"{'Training Total: ' if train else 'Testing Total: '}{total_lines_added} (Finishe: {className})\n\n")
+            print(f"{'Training Total: ' if train else 'Testing Total: '}{total_lines_added} (Finished: {className})\n\n")
                     
 generate_csv_train(True)
 generate_csv_train(False)

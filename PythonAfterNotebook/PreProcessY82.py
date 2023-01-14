@@ -23,10 +23,10 @@ test_file = os.path.join(path, 'yoga_test.txt')
 
 
 class_map = {
-    (0,2,75) : "Warrior", #Warrior
+    (0,3,73) : "WarriorIII", #WarriorIII
     (0,0,68) : "Tree", #Tree 
     (4,14,68): "Cobra", #Cobra
-    (4,16,44): "Plank", #Plank 
+    (0,0,8): "Chair", #Plank- Changing to chair 
     (0,1,17): "DownDog" #Downward Dog
 }
 
@@ -185,11 +185,6 @@ def generate_csv_train(train=True):
                 pose_relevant_landmark_cords = [[pose_landmarks.landmark[idx].x, pose_landmarks.landmark[idx].y]
                                                for _, idx, _ in angle_idxs_required if idx not in skip_landmark]
                 
-                
-                    
-               
-                
-
                 # Write pose sample to CSV.
                 pose_relevant_landmark_angles_data = np.around(pose_relevant_landmark_angles, 5).astype(str).tolist()
                 pose_relevant_landmark_angles_visual = np.around(pose_relevant_landmark_angles, 2).astype(str).tolist()
@@ -216,6 +211,7 @@ def generate_csv_train(train=True):
                     cv2.imwrite(os.path.join(path, 'tmp/tmp_img_' + str(img_count) + '.png'), cv2.cvtColor(output_image, cv2.COLOR_RGB2BGR))
                     img_count+=1
                     # print("!!! Successfully saved annotated image tmp folder !!!")
+                
                 print(f"COMPLETED IMAGE {line_idx}/{num_lines}...Total: {'Training Total: ' if train else 'Testing Total: '}{tot}\n\n")
                 
             # else:
