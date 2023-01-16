@@ -11,6 +11,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 min_detection_confidence = 0.5
+
 min_tracking_confidence = 0.5
 
 # All landmark except for hand and face specific
@@ -153,6 +154,8 @@ def generate_csv_train(train=True):
             
             
             # print(f"Succesfully download and read image from URL")       
+
+
 
             # Initialize fresh pose tracker and run it.
             with mp_pose.Pose(min_detection_confidence=min_detection_confidence, min_tracking_confidence=min_tracking_confidence) as pose_tracker:
