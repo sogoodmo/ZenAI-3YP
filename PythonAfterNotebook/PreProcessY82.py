@@ -26,7 +26,7 @@ test_file = os.path.join(path, 'yoga_test.txt')
 class_map = {
     (0,3,73) : "WarriorIII", #WarriorIII
     (0,0,68) : "Tree", #Tree 
-    (4,14,68): "Cobra", #Cobra
+    (4,14,10): "Cobra", #Cobra
     (0,0,8): "Chair", #Plank- Changing to chair 
     (0,1,17): "DownDog" #Downward Dog
 }
