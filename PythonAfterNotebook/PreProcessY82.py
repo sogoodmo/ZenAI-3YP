@@ -1,9 +1,10 @@
-import cv2
+# import cv2
 import mediapipe as mp
 import numpy as np
 import os
 import requests
 import csv
+from collections import Counter
 
 MAX_IMG_STORE = 0
 
@@ -17,7 +18,8 @@ min_tracking_confidence = 0.5
 # All landmark except for hand and face specific
 RelevantLandmarks = list(mp_pose.PoseLandmark)[11:17] + list(mp_pose.PoseLandmark)[23:29]
 
-path = 'C:\\Users\\moham\\Desktop\\Third Year Project\\yoga82code\\Yoga-82\\'
+path = '/Users/mohamed/ZenAI-3YP/yoga82code/Yoga-82'
+# path = 'C:\\Users\\moham\\Desktop\\Third Year Project\\yoga82code\\Yoga-82\\'
 img_links_path = os.path.join(path, 'yoga_dataset_links')
 train_file = os.path.join(path, 'yoga_train.txt')
 test_file = os.path.join(path, 'yoga_test.txt')
@@ -30,7 +32,7 @@ class_map = {
     (0,0,8): "Chair", #Plank- Changing to chair 
     (0,1,17): "DownDog" #Downward Dog
 }
-
+C = Counter() 
 def generate_link_map(train=True):
     train_links = dict()
     with open(train_file if train else test_file, 'r') as file:
@@ -42,7 +44,7 @@ def generate_link_map(train=True):
 
             if img_class not in class_map:
                 continue 
-
+            C[class_map[img_class]] += 1
             img_path, img_num = img_path.replace('/', ' ').split(' ') 
             img_path = img_path + '.txt'
             
