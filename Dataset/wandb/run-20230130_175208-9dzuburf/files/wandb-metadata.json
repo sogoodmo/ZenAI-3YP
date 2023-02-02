@@ -1,0 +1,41 @@
+{
+    "os": "macOS-11.6-x86_64-i386-64bit",
+    "python": "3.10.9",
+    "heartbeatAt": "2023-01-30T17:52:12.672862",
+    "startedAt": "2023-01-30T17:52:08.549089",
+    "docker": null,
+    "cuda": null,
+    "args": null,
+    "state": "running",
+    "program": "<python with no main file>",
+    "git": {
+        "remote": "https://github.com/sogoodmo/ZenAI-3YP",
+        "commit": "9c89f24378c55a968b16f757426c47bdb20550dc"
+    },
+    "email": "mohamed131927@gmail.com",
+    "root": "/Users/mohamed/ZenAI-3YP",
+    "host": "iphone.wifi-res.warwick.ac.uk",
+    "username": "mohamed",
+    "executable": "/Users/mohamed/ZenAI-3YP/3yp_venv/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 2400,
+        "min": 2400,
+        "max": 2400
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2400,
+            "min": 2400,
+            "max": 2400
+        }
+    ],
+    "disk": {
+        "total": 228.27386474609375,
+        "used": 14.288040161132812
+    },
+    "memory": {
+        "total": 8.0
+    }
+}

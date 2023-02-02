@@ -1,0 +1,1 @@
+{"columns": ["class", "dataset", "count"], "data": [["WarriorIII", "train", 301], ["WarriorIII", "test", 103], ["Tree", "train", 371], ["Tree", "test", 127], ["Cobra", "train", 365], ["Cobra", "test", 188], ["Chair", "train", 406], ["Chair", "test", 142], ["DownDog", "train", 354], ["DownDog", "test", 142]]}
