@@ -5,6 +5,8 @@ import os
 import requests
 import csv
 from collections import Counter
+import cv2 
+import traceback
 
 MAX_IMG_STORE = 0
 
@@ -104,6 +106,7 @@ def calc_angle(a, b, c):
     return angle 
 
 def generate_csv_train(train=True):
+    
     with open(train_file if train else test_file, 'r') as file:
         lines = file.readlines()
         num_lines = len(lines)
@@ -134,28 +137,23 @@ def generate_csv_train(train=True):
             
             try:
                 img_data = requests.get(img_url).content
-            except Exception as e:
-                # print(f'Error in downloading image... {img_url} | Trying next image...\n')
-                # print(e)
-                continue 
             
-            with open(tmp_img, 'wb') as handler:
-                handler.write(img_data)
-            
-            try:
-                image = cv2.imread(tmp_img)
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                os.remove(tmp_img)
-            except FileNotFoundError as e:
-                # print("Couldn't find temp file.. Trying next img\n")
-                continue 
+                
+                with open(tmp_img, 'wb') as handler:
+                    handler.write(img_data)
+                
+                
+                    image = cv2.imread(tmp_img)
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                    os.remove(tmp_img)
+                    
             except Exception as e:
-                # print("COULDN'T CONVERT IMAGE TO CV2 ARRAY.. Trying next img\n")
+                traceback.print_exc()
+                print("COULDN'T CONVERT IMAGE TO CV2 ARRAY.. Trying next img\n")
                 continue
-            
-            
-            # print(f"Succesfully download and read image from URL")       
-
+                
+                
+            print(f"Succesfully download and read image from URL")       
 
 
             # Initialize fresh pose tracker and run it.
@@ -163,7 +161,6 @@ def generate_csv_train(train=True):
                 result = pose_tracker.process(image=image)
                 pose_landmarks = result.pose_landmarks
                 
-
 
             #If a one of the valid pose' was detected, write this  
             output_image = image.copy()
@@ -218,8 +215,8 @@ def generate_csv_train(train=True):
                 
                 print(f"COMPLETED IMAGE {line_idx}/{num_lines}...Total: {'Training Total: ' if train else 'Testing Total: '}{tot}\n\n")
                 
-            # else:
-                # print(f"Could not extract pose from image: {img_url} Trying next image...\n")
+            else:
+                print(f"Could not extract pose from image: {img_url} Trying next image...\n")
 generate_csv_train(False)
 generate_csv_train(True)
 print("!!! DONE !!!")
