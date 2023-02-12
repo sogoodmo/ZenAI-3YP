@@ -69,7 +69,7 @@ def calc_angle(a, b, c):
     angle = np.abs(radians*180.0/np.pi)
     
     if angle > 180.0:
-        angle = 380-angle 
+        angle = 360-angle 
     
     return angle 
 
