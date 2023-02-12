@@ -12,7 +12,6 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 min_detection_confidence = 0.5
-
 min_tracking_confidence = 0.5
 
 # All landmark except for hand and face specific
@@ -26,7 +25,7 @@ test_file = os.path.join(path, 'yoga_test.txt')
 
 
 class_map = {
-    (0,3,73) : "WarriorIII", #WarriorIII
+    (0,3,74) : "WarriorII", #WarriorII - Chaning back to 2 from 3 
     (0,0,68) : "Tree", #Tree 
     (4,14,10): "Cobra", #Cobra
     (0,0,8): "Chair", #Plank- Changing to chair 
@@ -100,7 +99,7 @@ def calc_angle(a, b, c):
     angle = np.abs(radians*180.0/np.pi)
     
     if angle > 180.0:
-        angle = 380-angle 
+        angle = 360-angle 
     
     return angle 
 
@@ -199,22 +198,22 @@ def generate_csv_train(train=True):
                 # print("!!! Successfully added example row to CSV !!!")
                 
                 # Only storing certain number of images, don't want to clutter my disk 
-                if (img_count < MAX_IMG_STORE):
+                # if (img_count < MAX_IMG_STORE):
                 
                      # Map pose landmarks from [0, 1] range to absolute coordinates to get
                     # correct aspect ratio.
-                    frame_height, frame_width = output_image.shape[:2]
-                    pose_relevant_landmark_cords *= np.array([frame_width, frame_height])
-                    real_cords = tuple(pose_relevant_landmark_cords.astype(int))
+                    # frame_height, frame_width = output_image.shape[:2]
+                    # pose_relevant_landmark_cords *= np.array([frame_width, frame_height])
+                    # real_cords = tuple(pose_relevant_landmark_cords.astype(int))
 
 
-                    for idx, kp_cords in enumerate(real_cords):
-                        cv2.putText(output_image, f'{pose_relevant_landmark_angles_visual[idx]}', kp_cords, 
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA) 
+                    # for idx, kp_cords in enumerate(real_cords):
+                    #     cv2.putText(output_image, f'{pose_relevant_landmark_angles_visual[idx]}', kp_cords, 
+                    #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA) 
 
                     #Save image and recolour
-                    cv2.imwrite(os.path.join(path, 'tmp/tmp_img_' + str(img_count) + '.png'), cv2.cvtColor(output_image, cv2.COLOR_RGB2BGR))
-                    img_count+=1
+                    # cv2.imwrite(os.path.join(path, 'tmp/tmp_img_' + str(img_count) + '.png'), cv2.cvtColor(output_image, cv2.COLOR_RGB2BGR))
+                    # img_count+=1
                     # print("!!! Successfully saved annotated image tmp folder !!!")
                 
                 print(f"COMPLETED IMAGE {line_idx}/{num_lines}...Total: {'Training Total: ' if train else 'Testing Total: '}{tot}\n\n")

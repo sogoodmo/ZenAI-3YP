@@ -18,7 +18,7 @@ RelevantLandmarks = list(mp_pose.PoseLandmark)[11:17] + list(mp_pose.PoseLandmar
 path = 'C:\\Users\\moham\\Desktop\\Third Year Project\\LauranceMoneyDataset\\'
 
 class_map = {
-    "warrior" : "WarriorIII", #Warrior
+    # "warrior" : "WarriorIII", #Warrior
     "tree" : "Tree", #Tree 
     "cobra": "Cobra", #Cobra
     "chair": "Chair", #Plank 
