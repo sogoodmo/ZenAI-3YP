@@ -1,5 +1,7 @@
+from types import TracebackType
 import cv2
 import mediapipe as mp
+import traceback
 import numpy as np
 import os
 import csv
@@ -15,7 +17,7 @@ min_tracking_confidence = 0.5
 # All landmark except for hand and face specific
 RelevantLandmarks = list(mp_pose.PoseLandmark)[11:17] + list(mp_pose.PoseLandmark)[23:29]
 
-path = '/Users/mohamed/ZenAI-3YP/W3Extra'
+path = '/Users/mohamed/ZenAI-3YP/Image_Scraper/images'
 
 skip_landmark = {
     mp_pose.PoseLandmark.RIGHT_ANKLE,
@@ -73,42 +75,47 @@ def generate_csv_train(train=True):
     total_lines_added = 0
     with open(os.path.join(path, "training.csv" if train else "testing.csv"), 'w') as csv_out_file:
         csv_out_writer = csv.writer(csv_out_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        imgFolder = os.path.join(path + 'warrior2train') if train else os.path.join(path + 'warrior2test')
+        imgFolder = os.path.join(path) if train else os.path.join(path)
         
         for filename in os.listdir(imgFolder):
             
             image = cv2.imread(os.path.join(imgFolder, filename))
                 
             # Initialize fresh pose tracker and run it.
-            with mp_pose.Pose(min_detection_confidence=min_detection_confidence, min_tracking_confidence=min_tracking_confidence) as pose_tracker:
-                result = pose_tracker.process(image=image)
-                pose_landmarks = result.pose_landmarks
+            try:
+                with mp_pose.Pose(min_detection_confidence=min_detection_confidence, min_tracking_confidence=min_tracking_confidence) as pose_tracker:
+                    result = pose_tracker.process(image=image)
+                    pose_landmarks = result.pose_landmarks
 
 
-            if pose_landmarks is not None:
-        
-                pose_relevant_landmark_angles = []
-                # Going through all relevant landmarks, extracting their key angles
-                # Calculating the angle then adding to array 
-                for i1, i2, i3 in angle_idxs_required:
-                    
-                    fst = (pose_landmarks.landmark[i1].x, pose_landmarks.landmark[i1].y)
-                    snd = (pose_landmarks.landmark[i2].x, pose_landmarks.landmark[i2].y)
-                    thrd = (pose_landmarks.landmark[i3].x, pose_landmarks.landmark[i3].y)
-                    
-                    
-                    pose_relevant_landmark_angles.append(calc_angle(fst, snd, thrd))
-
-                    
-                # Write pose sample to CSV.
-                pose_relevant_landmark_angles_data = np.around(pose_relevant_landmark_angles, 5).astype(str).tolist()
-                    
-                csv_out_writer.writerow([filename] + ['WarriorII'] + pose_relevant_landmark_angles_data)
-                total_lines_added += 1
+                if pose_landmarks is not None:
             
+                    pose_relevant_landmark_angles = []
+                    # Going through all relevant landmarks, extracting their key angles
+                    # Calculating the angle then adding to array 
+                    for i1, i2, i3 in angle_idxs_required:
+                        
+                        fst = (pose_landmarks.landmark[i1].x, pose_landmarks.landmark[i1].y)
+                        snd = (pose_landmarks.landmark[i2].x, pose_landmarks.landmark[i2].y)
+                        thrd = (pose_landmarks.landmark[i3].x, pose_landmarks.landmark[i3].y)
+                        
+                        
+                        pose_relevant_landmark_angles.append(calc_angle(fst, snd, thrd))
+
+                        
+                    # Write pose sample to CSV.
+                    pose_relevant_landmark_angles_data = np.around(pose_relevant_landmark_angles, 5).astype(str).tolist()
+                        
+                    csv_out_writer.writerow([filename] + ['Unknown'] + pose_relevant_landmark_angles_data)
+                    total_lines_added += 1
+                    
+            except Exception:
+                traceback.print_exc()
+                continue
 
         print(f"{'Training Total: ' if train else 'Testing Total: '}{total_lines_added} (Finished: {'Warrior'})\n\n")
                     
 generate_csv_train(True)
-generate_csv_train(False)
+
+
 print("!!! DONE !!!")
