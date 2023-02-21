@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-# In[1]:
 import pandas as pd 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -123,13 +120,6 @@ if TRAIN_FOREST:
   display_confusion_matrix = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
   display_confusion_matrix.plot()
   print(classification_report(y_test, pred))
-
-
-# # KNN Classifer 
-# # Eh Around 88%
-# 
-
-# In[4]:
 
 
 if TRAIN_KNN:
