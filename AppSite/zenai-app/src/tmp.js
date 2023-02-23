@@ -13,8 +13,6 @@ function App() {
   const webcamRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
 
-
-
   useEffect(() => {
     let intervalId = null;
 
@@ -23,7 +21,16 @@ function App() {
         const imageSrc = webcamRef.current.getScreenshot();
         setImageSrc(imageSrc);
 
-        api.post('/webcam-frame', {data: imageSrc})
+        // Save the captured image to a file
+        const link = document.createElement('a');
+        link.download = 'captured.jpg';
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+
+        api.post('/webcam-frame', imageSrc, { headers: { 'Content-Type': 'image/jpeg' } })
           .then(response => {
             if (response.status === 200 && response.data !== 'error') {
               setImageReceived(response.data.image);
@@ -53,21 +60,6 @@ function App() {
     setImageReceived(false);
   };
 
-  const getTypeFromDataURL = (dataURL) => {
-    const imageData = dataURL.split(',')[1];
-    const type = imageData[0].charCodeAt(0).toString(16) + imageData[1].charCodeAt(0).toString(16);
-    switch (type) {
-      case '8950':
-        return 'image/png';
-      case '4749':
-        return 'image/gif';
-      case '424d':
-        return 'image/bmp';
-      default:
-        return 'image/jpeg';
-    }
-  };
-  
   return (
     <div className="App">
       <div className="image-container">
@@ -76,24 +68,27 @@ function App() {
           ref={webcamRef}
           screenshotFormat="image/jpeg"
           videoConstraints={{
-            width: 1280,
-            height: 720,
+            width: 640,
+            height: 360,
             facingMode: 'user',
           }}
         />
+        {imageSrc && <img src={imageSrc} alt="captured" />}
+      </div>
+      <div className="status-container">
+        {imageReceived ? (
+          <div>
+            <span className="received-message">Received</span>
+            <div className="image-received-container">
+              <img src={`data:image/jpeg;base64,${imageReceived}`} alt="received" />
+            </div>
+          </div>
+        ) : null}
       </div>
       <div className="button-container">
         <button onClick={startCapture}>Start capture</button>
         <button onClick={stopCapture}>Stop capture</button>
       </div>
-      {imageReceived ? (
-        <div>
-          <span className="received-message"> Webcam Footage Returned From Server </span>
-          <div className="image-received-container">
-            <img src={`data:image/jpeg;base64,${imageReceived}`} alt="received" />
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
