@@ -10,7 +10,8 @@ import traceback
 import pickle
 
 from joint_pose_vocab import vocab_dict
-from ZenAI_data_transformation import combined_test, combined_train, joint_idx_map, classes, columns, feedback_classes
+from ZenAI_data_transformation import generate_data
+from ZenAI_ideal_angles import calculate_ideal_angles
 
 
 from sklearn.ensemble import RandomForestClassifier
@@ -24,16 +25,77 @@ from sklearn.svm import SVC
 
 
 ''' Setting current dir to the dir that hosts this python file to avoid any funny buisness'''
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-path = os.getcwd()
-
-with open('models/svm_93.pkl', 'rb') as f:
-    model = pickle.load(f)
-
-def reshape_data(example):
-    return pd.DataFrame(np.array(example).reshape(1, -1), columns=columns[1:])
 
 
-data = reshape_data([8.390697637127042, 13.364568331384618, 16.49759248897499, 153.50000646379374, 173.20291493738577, 199.52935190007366, 179.00845878279233, 198.25172013734928])
-x = model.predict(data)
-print(classes[x[0]])
+"""
+    Generic type for a model of this purpose. All that is required is the models dump via a pkl file (or any that works)
+"""
+class Model:
+    def __init__(self, columns, classes):
+        self.columns = columns 
+        self.classes = classes 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+    def reshape_data(self, example):
+        # Reshape the input data so that it can be fed into the classifier
+        return pd.DataFrame(np.array(example).reshape(1, -1), columns=self.columns[1:])
+    
+    def predict(self, example, clf):
+        # Predict the output for the input example using the given classifier
+        formatted_example = self.reshape_data(example)
+        probabilty_classes = clf.predict_proba(formatted_example)
+
+        # Convert the predicted probabilities to a list of tuples containing the class and probability
+        prob_predicted_classes = [(self.classes[i], p) for i, p in enumerate(probabilty_classes[0])]
+        
+        # Get the highest predicted class 
+        predicted_class, prob = max(prob_predicted_classes, key=lambda x: x[1])
+        
+        return predicted_class, prob, sorted(prob_predicted_classes, key=lambda x: x[1], reverse=True)
+
+
+class ZenRandomForest(Model):
+    def __init__(self, columns, classes):
+        super().__init__(columns, classes)
+
+        with open('models/random_forest_92.pkl', 'rb') as f:
+            self.forest = pickle.load(f)
+
+    def predict(self, example):
+        # Predict the output for the input example using the random forest classifier
+        return super().predict(example, self.forest)
+
+
+class ZenKNN(Model):
+    def __init__(self, columns, classes):
+        super().__init__(columns, classes)
+
+        with open('models/knn_93.pkl', 'rb') as f:
+            self.knn = pickle.load(f)
+
+    def predict(self, example):
+        # Predict the output for the input example using the k-nearest neighbors classifier
+        return super().predict(example, self.knn)
+
+
+class ZenNN(Model):
+    def __init__(self, columns, classes):
+        super().__init__(columns, classes)
+
+        with open('models/nn_93.pkl', 'rb') as f:
+            self.nn = pickle.load(f)
+
+    def predict(self, example):
+        # Predict the output for the input example using the neural network classifier
+        return super().predict(example, self.nn)
+
+
+class ZenSVM(Model):
+    def __init__(self, columns, classes):
+        super().__init__(columns, classes)
+        with open('models/svm_93.pkl', 'rb') as f:
+            self.svm = pickle.load(f)
+
+    def predict(self, example):
+        # Predict the output for the input example using the support vector machine classifier
+        return super().predict(example, self.svm)

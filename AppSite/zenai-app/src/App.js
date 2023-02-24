@@ -8,25 +8,27 @@ const api = axios.create({
 });
 
 function App() {
-  const [imageSrc, setImageSrc] = useState(null);
   const [imageReceived, setImageReceived] = useState(false);
   const webcamRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
-
-
+  const [timeSpent, setTimeSpent] = useState(0);
 
   useEffect(() => {
     let intervalId = null;
 
     if (capturing) {
       intervalId = setInterval(() => {
-        const imageSrc = webcamRef.current.getScreenshot();
-        setImageSrc(imageSrc);
-
-        api.post('/webcam-frame', {data: imageSrc})
+        const curImage = webcamRef.current.getScreenshot();
+        
+        if (timeSpent === null){
+          setTimeSpent(0)
+        }
+        console.log(timeSpent)
+        api.post('/webcam-frame', {data: curImage, timeSpent: timeSpent})
           .then(response => {
             if (response.status === 200 && response.data !== 'error') {
               setImageReceived(response.data.image);
+              setTimeSpent(response.data.elapsed_time);
               console.log(response.data)
             } else {
               throw new Error('Failed to send webcam frame');
@@ -45,27 +47,13 @@ function App() {
 
   const startCapture = () => {
     setCapturing(true);
+    setTimeSpent(0);
   };
 
   const stopCapture = () => {
     setCapturing(false);
-    setImageSrc(null);
     setImageReceived(false);
-  };
-
-  const getTypeFromDataURL = (dataURL) => {
-    const imageData = dataURL.split(',')[1];
-    const type = imageData[0].charCodeAt(0).toString(16) + imageData[1].charCodeAt(0).toString(16);
-    switch (type) {
-      case '8950':
-        return 'image/png';
-      case '4749':
-        return 'image/gif';
-      case '424d':
-        return 'image/bmp';
-      default:
-        return 'image/jpeg';
-    }
+    setTimeSpent(0)
   };
   
   return (
