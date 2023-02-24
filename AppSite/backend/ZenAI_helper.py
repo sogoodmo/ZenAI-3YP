@@ -142,7 +142,7 @@ def generate_user_pose_feedback(joint, user_angle, ideal_angle, score, is_greate
 
 
         action = vocab_dict[pose][joint_idx][0] if is_greater_than_90 else vocab_dict[pose][joint_idx][1]
-        common_error = vocab_dict[pose][joint_idx][2].split(',')
+        common_error, common_fix = vocab_dict[pose][joint_idx][2].split(',')
 
         feedback_suggestion = {
             'raw' : f"{joint} | U: {rough_angle} / {user_angle} | G: {rough_ideal_angle} / {ideal_angle:.2f} | S: {score:.2f} | P: {pose}",
@@ -151,7 +151,7 @@ def generate_user_pose_feedback(joint, user_angle, ideal_angle, score, is_greate
                            f'and it\'s currently around a {rough_angle}',
                            f'You can do this by {action} your {joint} {severity} | S: {score:.2f}',
                            f'A common error here is: {common_error}'
-                        #    f'{common_fix}'
+                           f'{common_fix}'
                            ]
         }
 
@@ -285,7 +285,7 @@ def create_skeleton_video_display(pose_landmarks, classified_pose, classified_po
         cv2.putText(feedback_window, formatted_suggestion[3], unnormalize_cords(0.05, 0.45, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
 
         cv2.putText(feedback_window, formatted_suggestion[4], unnormalize_cords(0.05, 0.55, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
-        # cv2.putText(feedback_window, formatted_suggestion[5], unnormalize_cords(0.05, 0.6, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+        cv2.putText(feedback_window, formatted_suggestion[5], unnormalize_cords(0.05, 0.6, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
 
         ''' Pie Chart indiciating how well the joint is'''
         score_angle = int(joint_scores[worst_joint_idx][1] * 360)

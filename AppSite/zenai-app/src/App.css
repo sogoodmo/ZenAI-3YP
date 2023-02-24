@@ -64,3 +64,16 @@ button:hover {
 button:active {
   background-color: #777;
 }
+
+.preset-button-container{
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
+}
+.preset-button-container button{
+  margin-bottom: 8px;
+}
+.preset-class{
+  color: white;
+  font-size: xx-large;
+}

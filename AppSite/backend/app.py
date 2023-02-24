@@ -16,8 +16,6 @@ app = Flask(__name__)
 app.debug = True
 cors=CORS(app, supports_credentials=True) 
 
-TEST = False
-
 def img_2_byte(img):
     ret, image_jpeg = cv2.imencode('.jpg', img)
     image_bytes = image_jpeg.tobytes()
@@ -60,18 +58,18 @@ def process_webcam_frame():
 
         response['image'] = image_b64
 
-        print("\n\n\n\n\n\nPRINTING RESPONSE DICTIONARY")
-        for k,v in response.items():
-            if k != 'image':
-                print(k, v)
-            else:
-                print(f'v too long here is k: {k}')
-        print("FINISHED PRINTING RESPONSE DICTIONARY \n\n\n\n\n\n")
+        # print("\n\n\n\n\n\nPRINTING RESPONSE DICTIONARY")
+        # for k,v in response.items():
+        #     if k != 'image':
+        #         print(k, v)
+        #     else:
+        #         print(f'v too long here is k: {k}')
+        # print("FINISHED PRINTING RESPONSE DICTIONARY \n\n\n\n\n\n")
         return jsonify(response)  
         
     except Exception as e:
         print('ERROR IN APP.PY')
-        traceback.print_exc()
+        # traceback.print_exc()
         return 'error'
 
 if __name__ == '__main__':

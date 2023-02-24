@@ -22,21 +22,21 @@ vocab_dict = {
     'WarriorII_R' : {
         0 : ('raising', 'lowering', 'Your arms may be straight, but they should be parallel to the ground.'),
         2 : ('straightening', 'bending', 'Your arms may be parallel to the ground, but they should be straight.'),
-        4 : ('sinking', 'raising', 'Your hips may not be low enough. Try to make a right angle with your bent leg.'),
+        4 : ('sinking', 'raising', 'Your hips may not be low enough, Try to make a right angle with your bent leg.'),
         6 : ('bending', 'straightening', 'Your stance may not be wide enough, you should make your knee perpendicular to the floor.'),
         1 : ('raising', 'lowering', 'Your arms may be straight, but they should be parallel to the ground.'),
         3 : ('straightening', 'bending', 'Your arms may be parallel to the ground, but they should be straight.'),
-        5 : ('sinking', 'raising', 'Your hips may not be low enough. Try to make a right angle with your bent leg.'),
+        5 : ('sinking', 'raising', 'Your hips may not be low enough, Try to make a right angle with your bent leg.'),
         7 : ('bending', 'straightening', 'Your stance may not be wide enough, you should make your knee perpendicular to the floor.')
     },
     'WarriorII_L' : {
         0 : ('raising', 'lowering', 'Your arms may be straight, but they should be parallel to the ground.'),
         2 : ('straightening', 'bending', 'Your arms may be parallel to the ground, but they should be straight.'),
-        4 : ('sinking', 'raising', 'Your hips may not be low enough. Try to make a right angle with your bent leg.'),
+        4 : ('sinking', 'raising', 'Your hips may not be low enough, Try to make a right angle with your bent leg.'),
         6 : ('bending', 'straightening', 'Your stance may not be wide enough, you should make your knee perpendicular to the floor.'),
         1 : ('raising', 'lowering', 'Your arms may be straight, but they should be parallel to the ground.'),
         3 : ('straightening', 'bending', 'Your arms may be parallel to the ground, but they should be straight.'),
-        5 : ('sinking', 'raising', 'Your hips may not be low enough. Try to make a right angle with your bent leg.'),
+        5 : ('sinking', 'raising', 'Your hips may not be low enough, Try to make a right angle with your bent leg.'),
         7 : ('bending', 'straightening', 'Your stance may not be wide enough, you should make your knee perpendicular to the floor.')
     },
     'Chair' : {

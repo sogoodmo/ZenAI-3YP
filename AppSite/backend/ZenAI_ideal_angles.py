@@ -1,6 +1,14 @@
 import pandas as pd 
+import os 
 
-def calculate_ideal_angles(classes, combined_train):
+def calculate_ideal_angles(classes, combined_train, columns, feedback_classes):
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    
+    ideal_angles = pd.read_csv('joint_angles.csv', header=None)
+    ideal_angles.columns = columns
+    ideal_angles_map_single = {pose : ideal_angles[ideal_angles['class'] == pose].values.tolist()[0][1:] for pose in feedback_classes}
+    ideal_angles_map_single['Neutral'] = []
+
 
     ''' Finding the average for all poses except WarriorII and Tree. These need to be dealt in a special case explained in the next section'''
     ideal_angles_map_average = {pose : combined_train[combined_train['class'] == pose_idx].mean(axis=0).tolist()[1:] for pose_idx, pose in enumerate(classes) if pose not in {'WarriorII', 'Tree'}}
@@ -29,6 +37,7 @@ def calculate_ideal_angles(classes, combined_train):
     ideal_angles_map_average['Tree_R_U'] = Right_Tree_Up.mean(axis=0).tolist()[1:]
     ideal_angles_map_average['Tree_L_U'] = Left_Tree_Up.mean(axis=0).tolist()[1:]
 
-    ideal_angles_map = ideal_angles_map_average
+    ''' Change this to ideal_angles_map_average to change'''
+    ideal_angles_map = ideal_angles_map_single
 
-    return ideal_angles_map 
+    return ideal_angles_map

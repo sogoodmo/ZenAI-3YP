@@ -27,7 +27,7 @@ combined_test = data['combined_test']
 combined_train = data['combined_train']
 
 
-ideal_angles_map = calculate_ideal_angles(classes=classes, combined_train=combined_train)
+ideal_angles_map = calculate_ideal_angles(classes=classes, combined_train=combined_train, columns=columns, feedback_classes=feedback_classes)
 last_pose = 'Neutral'
 FRAME_WIDTH = 1280
 FRAME_HEIGHT = 720 
