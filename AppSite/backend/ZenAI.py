@@ -41,7 +41,7 @@ EXAMPLE_POSE_IMAGE = {i.replace('.jpeg', '') : cv2.imread(f"flask_assets/{i}", 1
 # DEMO_POSE_VIDEOS = {f.replace('.mp4', '') : '../demo_videos/' + f  for f in os.listdir('../demo_videos')}
 
 
-def process_image(image, start_time, last_pose, model: Model, SCORE_DIFFICULTY):
+def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0):
     with mp_pose.Pose(min_detection_confidence=MIN_DETECTION_CONFIDENCE, min_tracking_confidence=MIN_TRACKING_CONFIDENCE, static_image_mode=False) as pose:
         cv2.imwrite('tmp.jpg', image)
         try: 
@@ -64,6 +64,11 @@ def process_image(image, start_time, last_pose, model: Model, SCORE_DIFFICULTY):
             
             ''' Classification of Pose''' 
             classified_pose, classified_pose_confidence, prediction_probabilites = model.predict(joint_angles)
+
+            print(f'\n\n\n\nCLASSIFIED POSE {classified_pose} {classified_pose_confidence}\n{joint_angles}\n{prediction_probabilites}\n\n\n\n')
+            with open('shit.txt', 'a+') as f:
+                f.write(str(joint_angles))
+                f.write(',\n')
 
             ''' We take the pose the user is doing to be neutral if either it's classified as a neutral pose or the confidence of the classified pose is < 70%'''
             classified_pose = classified_pose if classified_pose_confidence >= 0.70 else 'Neutral'

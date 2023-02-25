@@ -10,6 +10,7 @@ from flask_cors import CORS
 import io
 import os
 
+''' How we get all the models'''
 from ZenAI import *
 
 app = Flask(__name__)
@@ -23,13 +24,16 @@ def img_2_byte(img):
 
     return image_b64
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+path = os.getcwd()
+
 @app.route('/webcam-frame', methods=['POST', 'GET'])
 def process_webcam_frame():
     
     try:
         data = request.get_json()
         result = data['data']
-        timeSpent = int(data['timeSpent'])
+        # timeSpent = int(data['timeSpent'])
 
         ''' Some how this is the only way this works? The conventional method of npbuffer and cv2.imdecode results in a None image...'''
         # Get the image from the request and decode it
@@ -42,7 +46,10 @@ def process_webcam_frame():
         image = cv2.cvtColor(npimg, cv2.COLOR_RGB2BGR) 
 
 
-        response = process_image(image=image, start_time=timeSpent, last_pose=last_pose, model=SvmModel, SCORE_DIFFICULTY=10)
+        num_imgs = len([f for f in os.listdir('stupid') if os.path.isfile(os.path.join('stupid', f))])
+        cv2.imwrite(f'stupid/tmp_{num_imgs+1}.jpg', image)
+
+        response = process_image(image=image, last_pose=last_pose, model=SvmModel, SCORE_DIFFICULTY=10)
 
 
         if 'error' in response:
@@ -56,8 +63,11 @@ def process_webcam_frame():
             image_b64 = img_2_byte(return_window)
 
 
-        response['image'] = image_b64
 
+        cv2.imwrite(f'stupid/tmp_{num_imgs+1}_returned.jpg', return_window)
+
+
+        response['image'] = image_b64
         # print("\n\n\n\n\n\nPRINTING RESPONSE DICTIONARY")
         # for k,v in response.items():
         #     if k != 'image':
@@ -69,7 +79,7 @@ def process_webcam_frame():
         
     except Exception as e:
         print('ERROR IN APP.PY')
-        # traceback.print_exc()
+        traceback.print_exc()
         return 'error'
 
 if __name__ == '__main__':

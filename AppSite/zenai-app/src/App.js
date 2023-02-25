@@ -16,9 +16,9 @@ function App() {
   const [imageReceived, setImageReceived] = useState(false);
   const videoRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
-  const [timeSpent, setTimeSpent] = useState(0);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [useWebcam, setUseWebcam] = useState(true);
+  const [sentImage, setSentImage] = useState(null);
 
   useEffect(() => {
     let intervalId = null;
@@ -26,19 +26,14 @@ function App() {
     if (capturing && !selectedVideo && useWebcam) {
       const webcam = videoRef.current;
       intervalId = setInterval(() => {
-        if (timeSpent === null) { 
-          setTimeSpent(0);
-        }
         // console.log(timeSpent);
 
         const curImage = webcam.getScreenshot();
-
-        api.post('/webcam-frame', { data: curImage, timeSpent: timeSpent })
+        setSentImage(curImage)
+        api.post('/webcam-frame', { data: curImage })
           .then(response => {
             if (response.status === 200 && response.data !== 'error') {
               setImageReceived(response.data.image);
-              setTimeSpent(response.data.elapsed_time);
-              // console.log(response.data);
             } else {
               throw new Error('Failed to send webcam frame');
             }
@@ -54,19 +49,17 @@ function App() {
       canvas.height = video.videoHeight;
 
       intervalId = setInterval(() => {
-        if (timeSpent === null) {
-          setTimeSpent(0);
-        }
         // console.log(timeSpent);
 
         canvas.getContext('2d').drawImage(video, 0, 0);
         const curImage = canvas.toDataURL('image/jpeg', 0.5);
+        setSentImage(curImage)
 
-        api.post('/webcam-frame', { data: curImage, timeSpent: timeSpent })
+
+        api.post('/webcam-frame', { data: curImage })
           .then(response => {
             if (response.status === 200 && response.data !== 'error') {
               setImageReceived(response.data.image);
-              setTimeSpent(response.data.elapsed_time);
               console.log(response.data);
             } else {
               throw new Error('Failed to send video frame');
@@ -75,23 +68,21 @@ function App() {
           .catch(error => {
             console.error(error);
           });
-      }, 1000);
+      }, 100);
     } else {
       clearInterval(intervalId);
     }
 
     return () => clearInterval(intervalId);
-  }, [capturing, selectedVideo, useWebcam, timeSpent]);
+  }, [capturing, selectedVideo, useWebcam]);
 
   const startCapture = () => {
     setCapturing(true);
-    setTimeSpent(0);
   };
 
   const stopCapture = () => {
     setCapturing(false);
     setImageReceived(false);
-    setTimeSpent(0);
   };
   
   const handleVideoChange = event => {
@@ -184,7 +175,7 @@ function App() {
           <span className="received-message"> Webcam Footage Returned From Server </span>
           <div className="image-received-container">
             <img src={`data:image/jpeg;base64,${imageReceived}`} alt="received" />
-          </div>
+            </div>
         </div>
       ) : null}
     </div>
