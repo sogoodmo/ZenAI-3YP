@@ -19,21 +19,28 @@ function App() {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [useWebcam, setUseWebcam] = useState(true);
   const [sentImage, setSentImage] = useState(null);
+  const [lastTime, setLastTime] = useState(-1); 
 
   useEffect(() => {
+    // Initialize local variables
     let intervalId = null;
-
+    
+    // Check if we are capturing from webcam or selected video
     if (capturing && !selectedVideo && useWebcam) {
+      // Get webcam and start capturing frames
       const webcam = videoRef.current;
       intervalId = setInterval(() => {
-        // console.log(timeSpent);
-
+        // Take screenshot of webcam and send frame to server
         const curImage = webcam.getScreenshot();
-        setSentImage(curImage)
+        setSentImage(curImage);
         api.post('/webcam-frame', { data: curImage })
           .then(response => {
             if (response.status === 200 && response.data !== 'error') {
+              // Process response and update state
               setImageReceived(response.data.image);
+              setLastTime(Date.now());
+              const classifiedPose = response.data.classified_pose;
+              // TODO: Do something with classified pose
             } else {
               throw new Error('Failed to send webcam frame');
             }
@@ -43,38 +50,45 @@ function App() {
           });
       }, 1000);
     } else if (capturing && selectedVideo) {
+      // Get video and canvas for drawing
       const video = videoRef.current;
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-
+      // Start capturing frames
       intervalId = setInterval(() => {
-        // console.log(timeSpent);
-
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        const curImage = canvas.toDataURL('image/jpeg', 0.5);
-        setSentImage(curImage)
-
-
-        api.post('/webcam-frame', { data: curImage })
-          .then(response => {
-            if (response.status === 200 && response.data !== 'error') {
-              setImageReceived(response.data.image);
-              console.log(response.data);
-            } else {
-              throw new Error('Failed to send video frame');
-            }
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      }, 100);
+        if (video.currentTime !== lastTime) {
+          // Draw video frame to canvas and send frame to server
+          canvas.getContext('2d').drawImage(video, 0, 0);
+          const curImage = canvas.toDataURL('image/jpeg', 0.5);
+          setSentImage(curImage);
+          setLastTime(video.currentTime);
+          api.post('/webcam-frame', { data: curImage })
+            .then(response => {
+              if (response.status === 200 && response.data !== 'error') {
+                // Process response and update state
+                setImageReceived(response.data.image);
+                const classifiedPose = response.data.classified_pose;
+                // TODO: Do something with classified pose
+              } else {
+                throw new Error('Failed to send video frame');
+              }
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        }
+      }, 125);
     } else {
+      // Clear interval if we're not capturing
       clearInterval(intervalId);
     }
-
+    // Clean up interval on unmount
     return () => clearInterval(intervalId);
-  }, [capturing, selectedVideo, useWebcam]);
+  }, [capturing, selectedVideo, useWebcam, lastTime]);
+  
+  
+  
 
   const startCapture = () => {
     setCapturing(true);

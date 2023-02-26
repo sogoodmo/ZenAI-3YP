@@ -43,7 +43,7 @@ EXAMPLE_POSE_IMAGE = {i.replace('.jpeg', '') : cv2.imread(f"flask_assets/{i}", 1
 
 def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0):
     with mp_pose.Pose(min_detection_confidence=MIN_DETECTION_CONFIDENCE, min_tracking_confidence=MIN_TRACKING_CONFIDENCE, static_image_mode=False) as pose:
-        cv2.imwrite('tmp.jpg', image)
+        # cv2.imwrite('tmp.jpg', image) debugging 
         try: 
             ''' Detect pose and extract angles / cords ''' 
             result = pose.process(image=image) 
@@ -65,9 +65,10 @@ def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0
             ''' Classification of Pose''' 
             classified_pose, classified_pose_confidence, prediction_probabilites = model.predict(joint_angles)
 
-            print(f'\n\n\n\nCLASSIFIED POSE {classified_pose} {classified_pose_confidence}\n{joint_angles}\n{prediction_probabilites}\n\n\n\n')
+            print(f'\n\n\n\nCLASSIFIED POSE {columns} {classified_pose} {classified_pose_confidence}\n{joint_angles}\n{prediction_probabilites}\n\n\n\n')
             with open('shit.txt', 'a+') as f:
                 f.write(str(joint_angles))
+                f.write(str(joint_cords))
                 f.write(',\n')
 
             ''' We take the pose the user is doing to be neutral if either it's classified as a neutral pose or the confidence of the classified pose is < 70%'''
@@ -91,32 +92,32 @@ def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0
                 as the ideal angles of someone doing a Left Tree or Right Tree are different. 
                 This makes the feedback dynamic and even allows for variation in the tree pose specifically
             '''
-            angles_score = [] 
             ideal_angles = [] 
+            angles_score = []
+            if classified_pose != 'Neutral':
+                if classified_pose in {'WarriorII', 'Tree'}:
+                    left = is_left_pose(classified_pose, joint_angles)
+                    right = not left
 
-            if classified_pose in {'WarriorII', 'Tree'}:
-                left = is_left_pose(classified_pose, joint_angles)
-                right = not left
+                    if classified_pose == 'WarriorII':
+                        if left:
+                            feedback_pose = 'WarriorII_L'
+                        else:
+                            feedback_pose = 'WarriorII_R'
+                        
 
-                if classified_pose == 'WarriorII':
-                    if left:
-                        feedback_pose = 'WarriorII_L'
-                    else:
-                        feedback_pose = 'WarriorII_R'
-                    
+                    elif classified_pose == 'Tree':
+                        down = is_down_tree(joint_angles) 
+                        up = not down 
 
-                elif classified_pose == 'Tree':
-                    down = is_down_tree(joint_angles) 
-                    up = not down 
-
-                    if left and down:
-                        feedback_pose = 'Tree_L_D'
-                    elif left and up:
-                        feedback_pose = 'Tree_L_U'
-                    elif right and down:
-                        feedback_pose =  'Tree_R_D'
-                    elif right and up:
-                        feedback_pose = 'Tree_R_U'     
+                        if left and down:
+                            feedback_pose = 'Tree_L_D'
+                        elif left and up:
+                            feedback_pose = 'Tree_L_U'
+                        elif right and down:
+                            feedback_pose =  'Tree_R_D'
+                        elif right and up:
+                            feedback_pose = 'Tree_R_U'     
 
 
                 ideal_angles = ideal_angles_map[feedback_pose]
@@ -125,9 +126,9 @@ def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0
                 ''' Calculate score for current frame given the expected exercise'''
                 angles_score = [cosine_similarity(cur_angle, ideal_angle, SCORE_DIFFICULTY) for cur_angle, ideal_angle in zip(joint_angles, ideal_angles)]
 
-
+            # print(f'\n\n\n\n\n{classified_pose}\n {angles_score}\n\n\n\n\n')
             ''' Second Window'''
-            feedback_window, black_image = create_skeleton_video_display(pose_landmarks, 
+            feedback_window, black_image, ret_feedback = create_skeleton_video_display(pose_landmarks, 
                                                           classified_pose,
                                                           classified_pose_confidence,
                                                           joint_angles_rounded,
@@ -155,12 +156,14 @@ def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0
                 'ideal_angles' : list(ideal_angles),
                 'feedback_pose' : feedback_pose,
                 'combined_videos' : combined_videos,
+                'pose_error' : ret_feedback[0],
+                'fix' : ret_feedback[1],
             }
             
         except Exception as e:
             print('ERROR IN ZENAI.PY')
             traceback.print_exc()
-            error_display = create_error_screen(FRAME_WIDTH, FRAME_HEIGHT, e) 
+            error_display = create_error_screen(FRAME_WIDTH, FRAME_HEIGHT, str(e)) 
 
             return {'error' : 'exception caught',
                     'error_image' : error_display}

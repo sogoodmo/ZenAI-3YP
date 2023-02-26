@@ -52,6 +52,7 @@ def generate_data():
             6 : 'Left Knee',
             7 : 'Right Knee'
         }
+    
     return {
         'joint_idx_map' : joint_idx_map,
         'classes' : classes,

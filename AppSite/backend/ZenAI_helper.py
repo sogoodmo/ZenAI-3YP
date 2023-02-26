@@ -150,7 +150,7 @@ def generate_user_pose_feedback(joint, user_angle, ideal_angle, score, is_greate
                            f'You should aim to get your {joint} to roughly {rough_ideal_angle}',
                            f'and it\'s currently around a {rough_angle}',
                            f'You can do this by {action} your {joint} {severity} | S: {score:.2f}',
-                           f'A common error here is: {common_error}'
+                           f'A common error here is: {common_error}',
                            f'{common_fix}'
                            ]
         }
@@ -246,13 +246,11 @@ def create_skeleton_video_display(pose_landmarks, classified_pose, classified_po
                 & Display the joint score for each joint on the right side of the frame'''
 
             ''' Get rid of this for performance'''
-            # if DISPLAY_ANGLE_SCORE:
-            #     if i == best_joint_idx:
-            #         cv2.putText(black_image, f'Best: {joint}: {score*100:.2f}% {joint_angles_rounded[i]} ', unnormalize_cords(0.53, 0.2 + (i / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 255, 0), 2, LINE)
-            #     elif i == worst_joint_idx:
-            #         cv2.putText(black_image, f'Worst: {joint}: {score*100:.2f}% {joint_angles_rounded[i]} ', unnormalize_cords(0.53, 0.2 + (i / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 0, 255), 2, LINE)
-            #     else:
-            #         cv2.putText(black_image, f'{joint}: {score*100:.2f}% {joint_angles_rounded[i]}', unnormalize_cords(0.60, 0.2 + (i / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+            if DISPLAY_ANGLE_SCORE:
+                if i == best_joint_idx:
+                    cv2.putText(black_image, f'Best: {joint}: {score*100:.2f}% {joint_angles_rounded[i]} ', unnormalize_cords(0.53, 0.2 + (1 / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 255, 0), 2, LINE)
+                elif i == worst_joint_idx:
+                    cv2.putText(black_image, f'Worst: {joint}: {score*100:.2f}% {joint_angles_rounded[i]} ', unnormalize_cords(0.53, 0.2 + (2 / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 0, 255), 2, LINE)
 
             improvement_suggestions[i] = generate_user_pose_feedback(joint, joint_angles_rounded[i], ideal_angles[i], score, diff_over_90, i, feedback_pose)
 
@@ -266,7 +264,7 @@ def create_skeleton_video_display(pose_landmarks, classified_pose, classified_po
         cv2.putText(black_image, f'Pose Score: {total_pose_score*100:.2f}%', unnormalize_cords(0.42, 0.1, frame_width, frame_height), FONT, 2, WHITE_TEXT, 2, LINE)
         
         ''' Displaying how long the user has held the pose'''
-        cv2.putText(black_image, f'Time held: {elapsed_time:.2f} seconds', unnormalize_cords(0.1, 0.1, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+        # cv2.putText(black_image, f'Time held: {elapsed_time:.2f} seconds', unnormalize_cords(0.1, 0.1, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
 
         ''' 
         Generate Imrpovements
@@ -275,7 +273,7 @@ def create_skeleton_video_display(pose_landmarks, classified_pose, classified_po
         #     y_placement = 0.2 + (i / (1.25 * len(improvement_suggestions)))
         #     cv2.putText(feedback_window, suggestion, unnormalize_cords(0.05, y_placement, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
         formatted_suggestion = improvement_suggestions[worst_joint_idx]['formatted']
-
+        print(f'\n\n\n\n {formatted_suggestion} \n\n\n\n')
         ''' Generate the improvement suggestion for the worst joint'''
         cv2.putText(feedback_window, improvement_suggestions[worst_joint_idx]['raw'], unnormalize_cords(0.05, 0.1, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
 
@@ -309,13 +307,18 @@ def create_skeleton_video_display(pose_landmarks, classified_pose, classified_po
         
     ''' Displaying the reference image in low opacity'''
     ''' Get rid of this for performance'''
-    # reference_image = cv2.resize(reference_image, (frame_width, frame_height))
-    # blended_image = cv2.addWeighted(black_image, 0.9, reference_image, 0.1, 0)
+    reference_image = cv2.resize(reference_image, (frame_width, frame_height))
+    blended_image = cv2.addWeighted(black_image, 0.9, reference_image, 0.1, 0)
 
     ''' Get rid of this for performance'''
     # ''' Write the joint angles on the black image ''' 
     for i, angle in enumerate(joint_angles_rounded):
         x, y = joint_cords[i]
-        cv2.putText(black_image, angle, unnormalize_cords(x, y, frame_width, frame_height), FONT, 0.5, WHITE_TEXT, 2, LINE)
+        cv2.putText(blended_image, angle, unnormalize_cords(x, y, frame_width, frame_height), FONT, 0.5, WHITE_TEXT, 2, LINE)
 
-    return feedback_window, black_image
+    if feedback_pose != 'Neutral':
+        ret_feedback = (formatted_suggestion[4], formatted_suggestion[5])
+    else:
+        ret_feedback = ('', '')
+
+    return feedback_window, blended_image, ret_feedback

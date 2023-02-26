@@ -47,7 +47,7 @@ def process_webcam_frame():
 
 
         num_imgs = len([f for f in os.listdir('stupid') if os.path.isfile(os.path.join('stupid', f))])
-        cv2.imwrite(f'stupid/tmp_{num_imgs+1}.jpg', image)
+        # cv2.imwrite(f'stupid/tmp_{num_imgs+1}.jpg', image) debugging save 
 
         response = process_image(image=image, last_pose=last_pose, model=SvmModel, SCORE_DIFFICULTY=10)
 
@@ -64,7 +64,7 @@ def process_webcam_frame():
 
 
 
-        cv2.imwrite(f'stupid/tmp_{num_imgs+1}_returned.jpg', return_window)
+        # cv2.imwrite(f'stupid/tmp_{num_imgs+1}_returned.jpg', return_window) debugging 
 
 
         response['image'] = image_b64
