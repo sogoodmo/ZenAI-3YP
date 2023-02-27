@@ -33,6 +33,7 @@ def process_webcam_frame():
     try:
         data = request.get_json()
         result = data['data']
+        diff = int(data['diff'])
         # timeSpent = int(data['timeSpent'])
 
         ''' Some how this is the only way this works? The conventional method of npbuffer and cv2.imdecode results in a None image...'''
@@ -46,10 +47,10 @@ def process_webcam_frame():
         image = cv2.cvtColor(npimg, cv2.COLOR_RGB2BGR) 
 
 
-        num_imgs = len([f for f in os.listdir('stupid') if os.path.isfile(os.path.join('stupid', f))])
+        # num_imgs = len([f for f in os.listdir('stupid') if os.path.isfile(os.path.join('stupid', f))])
         # cv2.imwrite(f'stupid/tmp_{num_imgs+1}.jpg', image) debugging save 
 
-        response = process_image(image=image, last_pose=last_pose, model=SvmModel, SCORE_DIFFICULTY=10)
+        response = process_image(image=image, last_pose=last_pose, model=SvmModel, SCORE_DIFFICULTY=diff)
 
 
         if 'error' in response:

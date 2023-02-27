@@ -65,11 +65,11 @@ def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0
             ''' Classification of Pose''' 
             classified_pose, classified_pose_confidence, prediction_probabilites = model.predict(joint_angles)
 
-            print(f'\n\n\n\nCLASSIFIED POSE {columns} {classified_pose} {classified_pose_confidence}\n{joint_angles}\n{prediction_probabilites}\n\n\n\n')
-            with open('shit.txt', 'a+') as f:
-                f.write(str(joint_angles))
-                f.write(str(joint_cords))
-                f.write(',\n')
+            # print(f'\n\n\n\nCLASSIFIED POSE {columns} {classified_pose} {classified_pose_confidence}\n{joint_angles}\n{prediction_probabilites}\n\n\n\n')
+            # with open('shit.txt', 'a+') as f:
+            #     f.write(str(joint_angles))
+            #     f.write(str(joint_cords))
+            #     f.write(',\n')
 
             ''' We take the pose the user is doing to be neutral if either it's classified as a neutral pose or the confidence of the classified pose is < 70%'''
             classified_pose = classified_pose if classified_pose_confidence >= 0.70 else 'Neutral'
@@ -125,7 +125,7 @@ def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0
 
                 ''' Calculate score for current frame given the expected exercise'''
                 angles_score = [cosine_similarity(cur_angle, ideal_angle, SCORE_DIFFICULTY) for cur_angle, ideal_angle in zip(joint_angles, ideal_angles)]
-
+            print(SCORE_DIFFICULTY)
             # print(f'\n\n\n\n\n{classified_pose}\n {angles_score}\n\n\n\n\n')
             ''' Second Window'''
             feedback_window, black_image, ret_feedback = create_skeleton_video_display(pose_landmarks, 
@@ -142,9 +142,10 @@ def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0
                                                           FRAME_WIDTH, FRAME_HEIGHT)
 
             combined_videos = np.concatenate((black_image, feedback_window), axis=1)
+            combined_videos = black_image
 
-
-
+            pose_error = '' if classified_pose == 'Neutral' else ret_feedback[3]
+            pose_fix = '' if classified_pose == 'Neutral' else ret_feedback[4]
 
             return {
                 'classified_pose' : classified_pose,
@@ -156,8 +157,9 @@ def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0
                 'ideal_angles' : list(ideal_angles),
                 'feedback_pose' : feedback_pose,
                 'combined_videos' : combined_videos,
-                'pose_error' : ret_feedback[0],
-                'fix' : ret_feedback[1],
+                'feedback' : ret_feedback[:3],
+                'pose_error' : pose_error,
+                'pose_fix' : pose_fix
             }
             
         except Exception as e:

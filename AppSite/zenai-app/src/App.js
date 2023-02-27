@@ -20,6 +20,14 @@ function App() {
   const [useWebcam, setUseWebcam] = useState(true);
   const [sentImage, setSentImage] = useState(null);
   const [lastTime, setLastTime] = useState(-1); 
+  const [poseError, setPoseError] = useState('');
+  const [poseFix, setPoseFix] = useState('');
+  const [poseHeldTime, setPoseHeldTime] = useState(1);
+  const [lastPose, setLastPose] = useState('')
+  const [lastPoseError, setLastPoseError] = useState(null);
+  const [feedbackList, setFeedbackList] = useState(null)
+  const [difficulty, setDifficulty] = useState(10); 
+
 
   useEffect(() => {
     // Initialize local variables
@@ -33,14 +41,25 @@ function App() {
         // Take screenshot of webcam and send frame to server
         const curImage = webcam.getScreenshot();
         setSentImage(curImage);
-        api.post('/webcam-frame', { data: curImage })
+        api.post('/webcam-frame', { data: curImage, diff: difficulty })
           .then(response => {
             if (response.status === 200 && response.data !== 'error') {
-              // Process response and update state
               setImageReceived(response.data.image);
-              setLastTime(Date.now());
-              const classifiedPose = response.data.classified_pose;
-              // TODO: Do something with classified pose
+                const curPoseError = response.data.pose_error;
+                setPoseError(curPoseError);
+                setPoseFix(response.data.pose_fix)
+                setFeedbackList(response.data.feedback)
+                console.log(response.data.feedback)
+                // TODO: Do something with classified pose
+                if (lastPoseError === curPoseError) {
+                  setPoseHeldTime(poseHeldTime + 2);
+                  // console.log(`Same. Last == Cur: (should be true) ${lastPoseError, curPoseError} HeldTime: ${poseHeldTime}`);
+                } else {
+                  setPoseHeldTime(1);
+                  setLastPoseError(curPoseError);
+                  // console.log(`Diff. Last == Cur (Should be flase): ${lastPoseError, curPoseError} HeldTime: ${poseHeldTime}`);
+                }
+                // console.log(poseHeldTime)
             } else {
               throw new Error('Failed to send webcam frame');
             }
@@ -63,13 +82,26 @@ function App() {
           const curImage = canvas.toDataURL('image/jpeg', 0.5);
           setSentImage(curImage);
           setLastTime(video.currentTime);
-          api.post('/webcam-frame', { data: curImage })
+          api.post('/webcam-frame', { data: curImage, diff: difficulty })
             .then(response => {
               if (response.status === 200 && response.data !== 'error') {
                 // Process response and update state
                 setImageReceived(response.data.image);
-                const classifiedPose = response.data.classified_pose;
+                const curPoseError = response.data.pose_error;
+                setPoseError(curPoseError);
+                setPoseFix(response.data.pose_fix)
+                setFeedbackList(response.data.feedback)
+                console.log(response.data.feedback)
                 // TODO: Do something with classified pose
+                if (lastPoseError === curPoseError) {
+                  setPoseHeldTime(poseHeldTime + 2);
+                  // console.log(`Same. Last == Cur: (should be true) ${lastPoseError, curPoseError} HeldTime: ${poseHeldTime}`);
+                } else {
+                  setPoseHeldTime(1);
+                  setLastPoseError(curPoseError);
+                  // console.log(`Diff. Last == Cur (Should be flase): ${lastPoseError, curPoseError} HeldTime: ${poseHeldTime}`);
+                }
+                // console.log(poseHeldTime)
               } else {
                 throw new Error('Failed to send video frame');
               }
@@ -78,14 +110,14 @@ function App() {
               console.error(error);
             });
         }
-      }, 125);
+      }, 100);
     } else {
       // Clear interval if we're not capturing
       clearInterval(intervalId);
     }
     // Clean up interval on unmount
     return () => clearInterval(intervalId);
-  }, [capturing, selectedVideo, useWebcam, lastTime]);
+  }, [capturing, useWebcam, lastTime, difficulty]);
   
   
   
@@ -146,10 +178,48 @@ function App() {
     );
   };
 
+  const HighlightedText = ({ text }) => {
+    const regex = /\+(.*?)\+/g;
+    const matches = text.match(regex);
+
+    const parts = text.split(regex);
+    return (
+      <div>
+        {parts.map((part, i) => {
+          if (matches.includes(`+${part}+`)) {
+            return (
+              <span key={i} style={{ color: 'red', fontStyle: 'italic' }}>
+                {part}
+              </span>
+            );
+          } else {
+            return <span key={i}>{part}</span>;
+          }
+        })}
+      </div>
+    );
+  };
+
+  const handleSliderChange = (e) => {
+    setDifficulty(e.target.value);
+  };
+
+
 
   return (
     <div className="App">
       <div className="image-container">
+        <div className="preset-button-container">
+          <button onClick={startCapture}>Start capture</button>
+          <button onClick={stopCapture}>Stop capture</button>
+          <button onClick={handleWebcamClick}>Capture webcam</button>
+          <button className="button">
+            <label>
+              Upload Video
+              <input type="file" accept="video/*" onChange={handleVideoChange} style={{ display: "none" }} />
+            </label>.
+          </button>
+        </div>
         {selectedVideo ? (
           <video ref={videoRef} controls src={selectedVideo} />
         ) : (
@@ -171,25 +241,37 @@ function App() {
           {renderButton('Downward Dog')}
           {renderButton('Tree')}
           {renderButton('WarriorII')}
+          <div className="slider-container">
+            <h2 className="slider-text">Pose Difficulty: {difficulty}</h2>
+            <input type="range" min="1" max="10" value={difficulty} onChange={handleSliderChange} style={{ width: '100%' }} />
+          </div>
         </div>
       </div>
-        <div className="button-container">
-          <button onClick={startCapture}>Start capture</button>
-          <button onClick={stopCapture}>Stop capture</button>
-          <button onClick={handleWebcamClick}>Capture webcam</button>
-          <button className="button">
-            <label>
-              Upload Video
-              <input type="file" accept="video/*" onChange={handleVideoChange} style={{ display: "none" }} />
-            </label>.
-          </button>
-        </div>
+
       {imageReceived ? (
         <div>
-          <span className="received-message"> Webcam Footage Returned From Server </span>
           <div className="image-received-container">
             <img src={`data:image/jpeg;base64,${imageReceived}`} alt="received" />
+
+          <div className="feedback-container">
+            {poseError !== '' && feedbackList != null ? 
+            (<div className='reformat'>
+              <h1><HighlightedText text={feedbackList[0]} /></h1>
+              <h1><HighlightedText text={feedbackList[1]} /></h1>
+              <h1><HighlightedText text={feedbackList[2]} /></h1>
+              {/* <h2>{feedbackList[1]}</h2>
+              <h2>{feedbackList[2]}</h2> */}
+            </div>)
+            : null}
+
+            {poseHeldTime > 2 && poseError !== '' ? 
+                (<div>
+                  <h1><a className='bigger'>Common Mistakes:</a></h1> 
+                  <h1>{poseError}!</h1> <h1>{poseFix}</h1>
+                </div>) 
+            : null}
             </div>
+          </div>
         </div>
       ) : null}
     </div>
