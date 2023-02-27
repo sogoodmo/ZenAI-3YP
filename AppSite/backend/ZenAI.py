@@ -125,7 +125,7 @@ def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0
 
                 ''' Calculate score for current frame given the expected exercise'''
                 angles_score = [cosine_similarity(cur_angle, ideal_angle, SCORE_DIFFICULTY) for cur_angle, ideal_angle in zip(joint_angles, ideal_angles)]
-            print(SCORE_DIFFICULTY)
+            # print(SCORE_DIFFICULTY)
             # print(f'\n\n\n\n\n{classified_pose}\n {angles_score}\n\n\n\n\n')
             ''' Second Window'''
             feedback_window, black_image, ret_feedback = create_skeleton_video_display(pose_landmarks, 
