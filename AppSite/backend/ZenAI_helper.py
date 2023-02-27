@@ -186,6 +186,27 @@ def render_skeleton(image, landmarks):
         mp_drawing.DrawingSpec(color=(209, 192, 42), circle_radius=2, thickness=2)
     )
 
+def create_live_video_display(image, pose_landmarks, classified_pose, classified_pose_confidence, frame_width, frame_height):
+    #Revert image color 
+    image.flags.writeable = True 
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+    #Render detections 
+    mp_drawing.draw_landmarks(
+        image, 
+        pose_landmarks, 
+        mp_pose.POSE_CONNECTIONS,
+        mp_drawing.DrawingSpec(color=(50, 145, 168), circle_radius=2, thickness=2),
+        mp_drawing.DrawingSpec(color=(209, 192, 42), circle_radius=2, thickness=2)
+    )
+    
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    
+    display_text = 'Neutral' if classified_pose == 'Neutral' else f'Confidence: {classified_pose} {classified_pose_confidence*100:.2f}%'
+    
+    cv2.putText(image, display_text, unnormalize_cords(0.3, 0.1, frame_width, frame_height), cv2.FONT_HERSHEY_SIMPLEX, 2, (125, 0, 0), 2, cv2.LINE_AA) 
+
+    return image
 
 def create_error_screen(frame_width, frame_height, errMessage = ""):
     black_image = np.zeros((frame_height, frame_width, 3), np.uint8)
@@ -199,7 +220,7 @@ def create_error_screen(frame_width, frame_height, errMessage = ""):
 
     return black_image
 
-def create_skeleton_video_display(pose_landmarks, classified_pose, classified_pose_confidence, joint_angles_rounded, joint_cords, joint_scores, elapsed_time, reference_image, ideal_angles, feedback_pose, joint_idx_map, frame_width, frame_height):
+def create_skeleton_video_display(pose_landmarks, classified_pose, classified_pose_confidence, joint_angles_rounded, joint_cords, joint_scores, elapsed_time, reference_image, ideal_angles, feedback_pose, joint_idx_map, frame_width, frame_height, dl=False):
     DISPLAY_ANGLE_SCORE = True
 
     ''' Creating the window that displays the feedback'''
@@ -245,13 +266,24 @@ def create_skeleton_video_display(pose_landmarks, classified_pose, classified_po
                 & Display the joint score for each joint on the right side of the frame'''
 
             ''' Get rid of this for performance'''
-            if DISPLAY_ANGLE_SCORE:
-                if i == best_joint_idx:
-                    cv2.putText(black_image, f'Best: {joint}: {score*100:.2f}%', unnormalize_cords(0.6, 0.2 + (1 / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 255, 0), 2, LINE)
-                elif i == worst_joint_idx:
-                    cv2.putText(black_image, f'Worst: {joint}: {score*100:.2f}%', unnormalize_cords(0.6, 0.2 + (2 / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 0, 255), 2, LINE)
-                    improvement_suggestions[worst_joint_idx] = generate_user_pose_feedback(joint, joint_angles_rounded[i], ideal_angles[i], score, diff_over_90, i, feedback_pose)
-            
+            if not dl:
+                if DISPLAY_ANGLE_SCORE:
+                    if i == best_joint_idx:
+                        cv2.putText(black_image, f'Best: {joint}: {score*100:.2f}%', unnormalize_cords(0.6, 0.2 + (1 / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 255, 0), 2, LINE)
+                    elif i == worst_joint_idx:
+                        cv2.putText(black_image, f'Worst: {joint}: {score*100:.2f}%', unnormalize_cords(0.6, 0.2 + (2 / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 0, 255), 2, LINE)
+                        improvement_suggestions[worst_joint_idx] = generate_user_pose_feedback(joint, joint_angles_rounded[i], ideal_angles[i], score, diff_over_90, i, feedback_pose)
+            else:
+                if DISPLAY_ANGLE_SCORE:
+                    if i == best_joint_idx:
+                        cv2.putText(black_image, f'Best: {joint}: {score*100:.2f}%', unnormalize_cords(0.6, 0.2 + (i / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 255, 0), 2, LINE)
+                    elif i == worst_joint_idx:
+                        cv2.putText(black_image, f'Worst: {joint}: {score*100:.2f}%', unnormalize_cords(0.6, 0.2 + (i / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, (0, 0, 255), 2, LINE)
+                        improvement_suggestions[worst_joint_idx] = generate_user_pose_feedback(joint, joint_angles_rounded[i], ideal_angles[i], score, diff_over_90, i, feedback_pose)
+                    else:
+                        cv2.putText(black_image, f'{joint}: {score*100:.2f}%', unnormalize_cords(0.6, 0.2 + (i / (1.25 * len(joint_cords))), frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+
+
             # with open('feedback.txt', 'a') as f:
             #     f.write(f'{feedback_pose}: {str(generate_user_pose_feedback(joint, joint_angles_rounded[i], ideal_angles[i], score, diff_over_90, i, feedback_pose))}\n')
 
@@ -275,25 +307,31 @@ def create_skeleton_video_display(pose_landmarks, classified_pose, classified_po
         formatted_suggestion = improvement_suggestions[worst_joint_idx]['formatted']
         # print(f'\n\n\n\n {formatted_suggestion} \n\n\n\n')
         ''' Generate the improvement suggestion for the worst joint'''
-        # cv2.putText(feedback_window, improvement_suggestions[worst_joint_idx]['raw'], unnormalize_cords(0.05, 0.1, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+        if dl:
+            cv2.putText(feedback_window, improvement_suggestions[worst_joint_idx]['raw'], unnormalize_cords(0.05, 0.1, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
 
-        # cv2.putText(feedback_window, formatted_suggestion[0], unnormalize_cords(0.05, 0.1, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+            cv2.putText(feedback_window, formatted_suggestion[0], unnormalize_cords(0.05, 0.2, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
 
-        # cv2.putText(feedback_window, formatted_suggestion[1], unnormalize_cords(0.05, 0.2, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
-        # cv2.putText(feedback_window, formatted_suggestion[2], unnormalize_cords(0.05, 0.25, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
-        
-        # cv2.putText(feedback_window, formatted_suggestion[3], unnormalize_cords(0.05, 0.35, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+            cv2.putText(feedback_window, formatted_suggestion[1], unnormalize_cords(0.05, 0.3, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+            cv2.putText(feedback_window, formatted_suggestion[2], unnormalize_cords(0.05, 0.35, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+            
+            cv2.putText(feedback_window, formatted_suggestion[3], unnormalize_cords(0.05, 0.45, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
 
-        # cv2.putText(feedback_window, formatted_suggestion[4], unnormalize_cords(0.05, 0.45, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
-        # cv2.putText(feedback_window, formatted_suggestion[5], unnormalize_cords(0.05, 0.5, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+            cv2.putText(feedback_window, formatted_suggestion[4], unnormalize_cords(0.05, 0.55, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
 
         ''' Pie Chart indiciating how well the joint is'''
-        score_angle = int(joint_scores[worst_joint_idx][1] * 360)
-        pie_center = unnormalize_cords(0.62, 0.9, frame_width, frame_height)
-        cv2.ellipse(black_image, pie_center, (40, 40), 0, 0, score_angle, (0, 255, 0), -1)
-        cv2.ellipse(black_image, pie_center, (40, 40), 0, score_angle, 360, (0, 0, 255), -1)
-        cv2.putText(black_image, f'{joint_idx_map[worst_joint_idx]} Score: {joint_scores[worst_joint_idx][1]*100:.0f}%', unnormalize_cords(0.62+0.05, 0.9+0.025, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
-
+        if not dl:
+            score_angle = int(joint_scores[worst_joint_idx][1] * 360)
+            pie_center = unnormalize_cords(0.62, 0.9, frame_width, frame_height)
+            cv2.ellipse(black_image, pie_center, (40, 40), 0, 0, score_angle, (0, 255, 0), -1)
+            cv2.ellipse(black_image, pie_center, (40, 40), 0, score_angle, 360, (0, 0, 255), -1)
+            cv2.putText(black_image, f'{joint_idx_map[worst_joint_idx]} Score: {joint_scores[worst_joint_idx][1]*100:.0f}%', unnormalize_cords(0.62+0.05, 0.9+0.025, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
+        else:
+            score_angle = int(joint_scores[worst_joint_idx][1] * 360)
+            pie_center = unnormalize_cords(0.1, 0.8, frame_width, frame_height)
+            cv2.ellipse(feedback_window, pie_center, (50, 50), 0, 0, score_angle, (0, 255, 0), -1)
+            cv2.ellipse(feedback_window, pie_center, (50, 50), 0, score_angle, 360, (0, 0, 255), -1)
+            cv2.putText(feedback_window, f'{joint_idx_map[worst_joint_idx]} Score: {joint_scores[worst_joint_idx][1]*100:.0f}%', unnormalize_cords(0.1+0.05, 0.8+0.05, frame_width, frame_height), FONT, 1, WHITE_TEXT, 2, LINE)
 
         ''' uncommoent '''
         # with open('test_output.txt', 'a') as f:

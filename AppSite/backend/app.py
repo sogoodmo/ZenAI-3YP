@@ -1,7 +1,7 @@
 import json
 import cv2
 from cv2 import trace
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from base64 import b64encode
 import base64
 from PIL import Image 
@@ -26,6 +26,55 @@ def img_2_byte(img):
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 path = os.getcwd()
+
+
+
+@app.route('/process_video', methods=['POST', 'GET'])
+def analyse():
+    try:
+        # Get the video file from the request and read it using OpenCV
+        file = request.files['video']
+        file.save('tmp.mp4')
+
+        # Read the video file into a NumPy array using OpenCV
+        video = cv2.VideoCapture('tmp.mp4')
+        frames = []
+        while True:
+            ret, frame = video.read()
+            if not ret:
+                break
+            frames.append(frame)
+
+        # Process each frame of the video using the process_image function
+        processed_frames = []
+        for frame in frames:
+            response = process_image_dl(image=frame, last_pose=last_pose, model=SvmModel, SCORE_DIFFICULTY=10)
+
+            if 'error' in response:
+                processed_frames.append(response['error_image'])
+            else:
+                processed_frames.append(response['combined_videos'])
+                
+        # Combine the processed frames into a video and save it to disk
+        height, width, channels = processed_frames[0].shape
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter('tmp_analysed.mp4', fourcc, 12, (width, height))
+        for frame in processed_frames:
+            out.write(frame)
+        out.release()
+
+        # return 'error'
+
+        sent_file = send_file('tmp_analysed.mp4', as_attachment=True)
+
+        # Send the processed video file to the client
+        return sent_file
+
+    except Exception as e:
+        print('error in processing video')
+        traceback.print_exc()
+        return 'error'
+
 
 @app.route('/webcam-frame', methods=['POST', 'GET'])
 def process_webcam_frame():
@@ -62,7 +111,6 @@ def process_webcam_frame():
             return_window = response['combined_videos']
             response['combined_videos'] = "SUCCESS"
             image_b64 = img_2_byte(return_window)
-
 
 
         # cv2.imwrite(f'stupid/tmp_{num_imgs+1}_returned.jpg', return_window) debugging 

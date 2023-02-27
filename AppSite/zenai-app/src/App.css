@@ -13,7 +13,14 @@
   align-items: center;
   /* margin: 32px 0; */
 }
-
+.analyse {
+  display: flex;
+  color: white;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-size: 30px;
+}
 .image-container img:last-child {
   margin-left: 20px;
 }

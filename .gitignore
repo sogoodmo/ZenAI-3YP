@@ -155,3 +155,4 @@ W3Extra
 server_videos
 
 node_modules
+*.mp4

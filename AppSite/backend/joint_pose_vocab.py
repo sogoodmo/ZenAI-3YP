@@ -44,11 +44,11 @@ vocab_dict = {
         7 : ('straightening', 'bending', 'Your knees may not be bent the correct amount, You can try to fix this by making sure your knee perpendicular to the floor.'),
     },
     'Chair' : {
-        0 : ('lowering', 'raising', 'You may not be raising your arms the correct amount, You can try to fix this by keeping your biceps inline wiht your ears and relaxing your shoulders.'),
+        0 : ('lowering', 'raising', 'You may not be raising your arms the correct amount, You can try to fix this by keeping your biceps inline with your ears and relaxing your shoulders.'),
         2 : ('bending', 'straightening', 'You may not be extending your arms enough, You can try to fix this by straightening them as much as you can and extending your fingers.'),
         4 : ('straightening', 'bending', 'You may be leaning too far foward, You can try to fix this by forming a right angle between your torso and your thighs.'),
         6 : ('straightening', 'bending', 'You knees may not be bent the correct amount, You can try to fix this by bending your knees over your feet but not over your toes.'),
-        1 : ('lowering', 'raising', 'You may not be raising your arms the correct amount, You can try to fix this by keeping your biceps inline wiht your ears and relaxing your shoulders.'),
+        1 : ('lowering', 'raising', 'You may not be raising your arms the correct amount, You can try to fix this by keeping your biceps inline with your ears and relaxing your shoulders.'),
         3 : ('bending', 'straightening', 'You may not be extending your arms enough, You can try to fix this by straightening them as much as you can and extending your fingers.'),
         5 : ('straightening', 'bending', 'You may be leaning too far foward, You can try to fix this by forming a right angle between your torso and your thighs.'),
         7 : ('straightening', 'bending', 'You knees may not be bent the correct amount, You can try to fix this by bending your knees over your feet but not over your toes.'),

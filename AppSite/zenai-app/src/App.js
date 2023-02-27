@@ -7,6 +7,7 @@ import CobraExample from './server_videos/Cobra.mp4'
 import WarriorIIExample from './server_videos/WarriorII.mp4'
 import TreeExample from './server_videos/Tree.mp4'
 import DowndogExample from './server_videos/Downdog.mp4'
+import FileSaver from "file-saver";
 
 const api = axios.create({
   baseURL: 'http://localhost:5000',
@@ -27,7 +28,8 @@ function App() {
   const [lastPoseError, setLastPoseError] = useState(null);
   const [feedbackList, setFeedbackList] = useState(null)
   const [difficulty, setDifficulty] = useState(10); 
-
+  const [videoFile, setVideoFile] = useState(null);
+  const [isAnalysing, setIsAnalysing] = useState(false);
 
   useEffect(() => {
     // Initialize local variables
@@ -67,7 +69,7 @@ function App() {
           .catch(error => {
             console.error(error);
           });
-      }, 1000);
+      }, 100);
     } else if (capturing && selectedVideo) {
       // Get video and canvas for drawing
       const video = videoRef.current;
@@ -119,8 +121,27 @@ function App() {
     return () => clearInterval(intervalId);
   }, [capturing, useWebcam, lastTime, difficulty]);
   
-  
-  
+  const handleVideoUpload = (event) => {
+    const file = event.target.files[0];
+    setVideoFile(file);
+    const formData = new FormData();
+    formData.append("video", file);
+    
+    console.log('sending video');
+
+    api.post("/process_video", formData, {
+      responseType: "blob",
+    })
+    .then((response) => {
+      const videoBlob = new Blob([response.data], { type: response.data.type });
+      FileSaver.saveAs(videoBlob, "analysed_video.mp4");
+      setIsAnalysing(false);
+    })
+    .catch(error => {
+      console.log(error);
+    });
+  }
+
 
   const startCapture = () => {
     setCapturing(true);
@@ -132,6 +153,8 @@ function App() {
   };
   
   const handleVideoChange = event => {
+    setIsAnalysing(true);
+    handleVideoUpload(event);
     const file = event.target.files[0];
     if (file) {
       setSelectedVideo(URL.createObjectURL(file));
@@ -208,6 +231,13 @@ function App() {
 
   return (
     <div className="App">
+      {isAnalysing && (
+        <div className="analyse">
+          <h2>Analysing video...</h2>
+          <h3>Your analysed video will be downloaded shortly...</h3>
+          <h5>This message will dissapear once completed...</h5>
+        </div>
+      )}
       <div className="image-container">
         <div className="preset-button-container">
           <button onClick={startCapture}>Start capture</button>
@@ -259,12 +289,10 @@ function App() {
               <h1><HighlightedText text={feedbackList[0]} /></h1>
               <h1><HighlightedText text={feedbackList[1]} /></h1>
               <h1><HighlightedText text={feedbackList[2]} /></h1>
-              {/* <h2>{feedbackList[1]}</h2>
-              <h2>{feedbackList[2]}</h2> */}
             </div>)
             : null}
 
-            {poseHeldTime > 2 && poseError !== '' ? 
+            {poseHeldTime > 3 && poseError !== '' ? 
                 (<div>
                   <h1><a className='bigger'>Common Mistakes:</a></h1> 
                   <h1>{poseError}!</h1> <h1>{poseFix}</h1>
