@@ -54,7 +54,8 @@ def process_image_dl(image, last_pose, model: Model, SCORE_DIFFICULTY, start_tim
 
 
                 return {'error': 'cannot detect pose',
-                        'error_image' : error_display
+                        'error_image' : error_display,
+                        'angles_score' : []
                         }
 
             pose_landmarks = result.pose_landmarks
@@ -143,6 +144,7 @@ def process_image_dl(image, last_pose, model: Model, SCORE_DIFFICULTY, start_tim
 
             return {
                 'combined_videos' : combined_videos,
+                'angles_score' : angles_score
             }
             
         except Exception as e:
@@ -151,7 +153,8 @@ def process_image_dl(image, last_pose, model: Model, SCORE_DIFFICULTY, start_tim
             error_display = create_error_screen(FRAME_WIDTH, FRAME_HEIGHT, str(e)) 
 
             return {'error' : 'exception caught',
-                    'error_image' : error_display}
+                    'error_image' : error_display,
+                    'angles_score' : []}
 
 def process_image(image, last_pose, model: Model, SCORE_DIFFICULTY, start_time=0):
     with mp_pose.Pose(min_detection_confidence=MIN_DETECTION_CONFIDENCE, min_tracking_confidence=MIN_TRACKING_CONFIDENCE, static_image_mode=False) as pose:

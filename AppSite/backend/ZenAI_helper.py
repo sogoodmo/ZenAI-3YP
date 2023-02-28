@@ -148,7 +148,7 @@ def generate_user_pose_feedback(joint, user_angle, ideal_angle, score, is_greate
             'raw' : f"{joint} | U: {rough_angle} / {user_angle} | G: {rough_ideal_angle} / {ideal_angle:.2f} | S: {score:.2f} | P: {pose}",
             'formatted' : [f'Your +{joint}+ is out of place.', 
                            f'You should aim to get your +{joint}+ to roughly +{rough_ideal_angle}+ degrees and it\'s currently around +{int(rough_angle)}+ degrees.',
-                           f'You can do this by +{action}+ your +{joint}+ +{severity}+',
+                           f'You fix this by +{action}+ your +{joint}+ +{severity}+',
                            f'{common_error}',
                            f'{common_fix}'
                            ]

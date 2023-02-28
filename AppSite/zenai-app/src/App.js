@@ -8,6 +8,7 @@ import WarriorIIExample from './server_videos/WarriorII.mp4'
 import TreeExample from './server_videos/Tree.mp4'
 import DowndogExample from './server_videos/Downdog.mp4'
 import FileSaver from "file-saver";
+import JSZip from 'jszip'
 
 const api = axios.create({
   baseURL: 'http://localhost:5000',
@@ -30,6 +31,7 @@ function App() {
   const [difficulty, setDifficulty] = useState(10); 
   const [videoFile, setVideoFile] = useState(null);
   const [isAnalysing, setIsAnalysing] = useState(false);
+  const [displayDetail, setDisplayDetail] = useState(true);
 
   useEffect(() => {
     // Initialize local variables
@@ -120,14 +122,13 @@ function App() {
     // Clean up interval on unmount
     return () => clearInterval(intervalId);
   }, [capturing, useWebcam, lastTime, difficulty]);
-  
+
   const handleVideoUpload = (event) => {
     const file = event.target.files[0];
     setVideoFile(file);
     const formData = new FormData();
     formData.append("video", file);
     
-    console.log('sending video');
 
     api.post("/process_video", formData, {
       responseType: "blob",
@@ -135,13 +136,13 @@ function App() {
     .then((response) => {
       const videoBlob = new Blob([response.data], { type: response.data.type });
       FileSaver.saveAs(videoBlob, "analysed_video.mp4");
+      FileSaver.saveAs(videoBlob, "analytics.jpg");
       setIsAnalysing(false);
     })
     .catch(error => {
       console.log(error);
     });
   }
-
 
   const startCapture = () => {
     setCapturing(true);
@@ -226,16 +227,31 @@ function App() {
   const handleSliderChange = (e) => {
     setDifficulty(e.target.value);
   };
+  const handleDetailChange = () =>{
+    setDisplayDetail(!displayDetail);
+    console.log(displayDetail)
+  }
 
-
+  const [ellipsisCount, setEllipsisCount] = useState(0);
+  const ellipses = ['.', '..', '...'];
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setEllipsisCount((count) => (count + 1) % ellipses.length);
+    }, 500);
+  
+    return () => clearInterval(intervalId);
+  }, []);
+  
+  const ellipsis = ellipses[ellipsisCount];
 
   return (
     <div className="App">
       {isAnalysing && (
         <div className="analyse">
-          <h2>Analysing video...</h2>
-          <h3>Your analysed video will be downloaded shortly...</h3>
-          <h5>This message will dissapear once completed...</h5>
+          <h2>Analysing video{ellipsis}</h2>
+          <h3>Your analysed video will be downloaded shortly{ellipsis}</h3>
+          <h5>This message will dissapear once completed{ellipsis}</h5>
         </div>
       )}
       <div className="image-container">
@@ -251,7 +267,7 @@ function App() {
           </button>
         </div>
         {selectedVideo ? (
-          <video ref={videoRef} controls src={selectedVideo} />
+          <video style={{marginTop: "10px"}} ref={videoRef} controls src={selectedVideo} />
         ) : (
           <Webcam
             audio={false}
@@ -275,6 +291,8 @@ function App() {
             <h2 className="slider-text">Pose Difficulty: {difficulty}</h2>
             <input type="range" min="1" max="10" value={difficulty} onChange={handleSliderChange} style={{ width: '100%' }} />
           </div>
+          <h2 className="slider-text">Display Extra Detail</h2>
+          <input type="checkbox" value={displayDetail} onChange={handleDetailChange}></input>
         </div>
       </div>
 
@@ -287,12 +305,12 @@ function App() {
             {poseError !== '' && feedbackList != null ? 
             (<div className='reformat'>
               <h1><HighlightedText text={feedbackList[0]} /></h1>
-              <h1><HighlightedText text={feedbackList[1]} /></h1>
+              {!displayDetail ? (<h1><HighlightedText text={feedbackList[1]} /></h1>) : null}
               <h1><HighlightedText text={feedbackList[2]} /></h1>
             </div>)
             : null}
 
-            {poseHeldTime > 3 && poseError !== '' ? 
+            {poseHeldTime > 2 && poseError !== '' && !displayDetail ? 
                 (<div>
                   <h1><a className='bigger'>Common Mistakes:</a></h1> 
                   <h1>{poseError}!</h1> <h1>{poseFix}</h1>
